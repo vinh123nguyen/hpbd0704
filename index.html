@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gửi Ly</title>
+    <style>
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            background: #000; overflow: hidden; font-family: sans-serif; 
+        }
+        
+        /* Nền ánh sao */
+        #star-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute; background: white; border-radius: 50%;
+            opacity: 0.5; animation: twinkle var(--t) infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Bố cục dàn đều 10 thiệp */
+        #scene { 
+            position: relative; width: 100vw; height: 100vh; 
+            display: grid; z-index: 1;
+            /* Mobile: 2 cột, 5 hàng | PC: 5 cột, 2 hàng */
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            padding: 20px;
+        }
+
+        @media (min-width: 600px) {
+            #scene {
+                grid-template-columns: repeat(5, 1fr);
+                grid-template-rows: repeat(2, 1fr);
+            }
+        }
+
+        .envelope-container {
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .envelope-wrapper {
+            width: 75px; height: 55px; cursor: pointer;
+            animation: float 4s ease-in-out infinite;
+            animation-delay: var(--d);
+            will-change: transform;
+        }
+
+        .envelope {
+            width: 100%; height: 100%; background: #fff; border-radius: 4px;
+            border: 1px solid #d4af37; position: relative;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+            transform: rotate(var(--r));
+        }
+
+        .heart { color: #ff4d4d; font-size: 16px; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        /* Lời nhắn */
+        #overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); display: none; 
+            justify-content: center; align-items: center; z-index: 100;
+        }
+
+        .card {
+            width: 85%; max-width: 300px; background: #111; color: #fff;
+            padding: 35px 25px; border-radius: 12px; text-align: center; border: 1px solid #d4af37;
+        }
+
+        .card p { line-height: 1.6; font-size: 1.1rem; margin-bottom: 25px; }
+        
+        .btn { background: #d4af37; border: none; padding: 12px 25px; border-radius: 5px; color: #000; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div id="star-canvas"></div>
+    <div id="scene"></div>
+
+    <div id="overlay">
+        <div class="card" id="card-content"></div>
+    </div>
+
+    <script>
+        // Tạo ánh sao nền
+        function createStars() {
+            const canvas = document.getElementById('star-canvas');
+            for (let i = 0; i < 150; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                const size = Math.random() * 3 + 'px';
+                star.style.width = size;
+                star.style.height = size;
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.setProperty('--t', (2 + Math.random() * 3) + 's');
+                canvas.appendChild(star);
+            }
+        }
+
+        const wishes = [
+            "Mừng sinh nhật Ly. Hôm nay em cứ vui vẻ là được.",
+            "Cảm ơn Ly vì thời gian qua đã ở bên cạnh anh.",
+            "Chúc Ly tuổi mới bớt suy nghĩ lại, cười nhiều hơn.",
+			"Chúc em mọi việc hanh thông."
+            "Em cười nhiều lên nhé, anh luôn ở đây.",
+            "Anh trân trọng sự hiện diện của Ly ngay lúc này.",
+            "Mong mọi việc của Ly đều suôn sẻ.",
+            "Sinh nhật vui vẻ nhé.",
+            "Cảm ơn Ly vì đã chân thành với anh."
+			"Mừng sinh nhật Ly. Món quà sắp tới chờ anh nhé!!!!!"
+        ];
+
+        function init() {
+            createStars();
+            const scene = document.getElementById('scene');
+            
+            wishes.forEach((wish, i) => {
+                const container = document.createElement('div');
+                container.className = 'envelope-container';
+
+                const wrap = document.createElement('div');
+                wrap.className = 'envelope-wrapper';
+                wrap.style.setProperty('--d', (i * 0.4) + 's');
+                wrap.style.setProperty('--r', (Math.random() * 20 - 10) + 'deg');
+
+                wrap.innerHTML = `<div class="envelope"><span class="heart">❤</span></div>`;
+                
+                wrap.onclick = function() {
+                    const overlay = document.getElementById('overlay');
+                    document.getElementById('card-content').innerHTML = `
+                        <p>${wish}</p>
+                        <button class="btn" onclick="document.getElementById('overlay').style.display='none'">Đóng</button>
+                    `;
+                    overlay.style.display = 'flex';
+                };
+
+                container.appendChild(wrap);
+                scene.appendChild(container);
+            });
+        }
+        window.onload = init;
+    </script>
+</body>
+</html>
